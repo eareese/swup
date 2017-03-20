@@ -4,36 +4,7 @@ let path = require('path'),
     HtmlWebpackPlugin = require('html-webpack-plugin'),
     ServiceWorkerWebpackPlugin = require('serviceworker-webpack-plugin')
 
-
-const webpackConfig = {
-  target: 'web'
-}
-
-webpackConfig.entry = {
-  app: './src/app.js'
-}
-
-webpackConfig.output = {
-  path: path.resolve(__dirname, 'dist'),
-  filename: '[chunkhash].bundle.js'
-}
-
-webpackConfig.plugins = [
-  new ExtractTextPlugin('styles.css'),
-  new HtmlWebpackPlugin({
-    title: 'WebsiteGreatTitle',
-    template: '!!pug-loader!src/index.pug'
-  }),
-  new webpack.ProvidePlugin({
-    $: 'jquery',
-    jQuery: 'jquery'
-  }),
-  new ServiceWorkerWebpackPlugin({
-    entry: path.resolve(__dirname, 'src/serviceworker.js')
-  })
-]
-
-webpackConfig.module = {
+let commonModule = {
   rules: [
     {
       test: /\.js$/,
@@ -49,15 +20,43 @@ webpackConfig.module = {
         fallback: 'style-loader',
         use: 'css-loader'
       })
+    },
+    {
+      test: /\.pug$/,
+      use: 'pug-loader'
     }
   ]
 }
-// node: {
-//   fs: 'empty'
-// }
 
-webpackConfig.devServer = {
-  contentBase: 'src/'
+let commonPlugins = [
+  new HtmlWebpackPlugin({
+    template: '!!pug-loader!src/index.pug'
+  }),
+  new ExtractTextPlugin('styles.css'),
+  new webpack.ProvidePlugin({
+    $: 'jquery',
+    jQuery: 'jquery'
+  }),
+  new ServiceWorkerWebpackPlugin({
+    entry: path.resolve(__dirname, 'src/serviceworker.js'),
+    myOpt: 'whatever'
+  }),
+  new webpack.optimize.CommonsChunkPlugin({
+    names: ['vendor', 'manifest']
+  })
+]
+
+module.exports = function() {
+  return {
+    target: 'web',
+
+    entry: {
+      'main': './src/app.js',
+      'vendor': 'jquery'
+    },
+
+    module: commonModule,
+
+    plugins: commonPlugins
+  }
 }
-
-module.exports = webpackConfig
