@@ -7,6 +7,7 @@ module.exports = function(env) {
     output: {
       path: path.resolve(__dirname, 'dist'),
       filename: '[name].[chunkhash].js'
-    }
+    },
+    devtool: 'cheap-module-source-map'
   })
 }
